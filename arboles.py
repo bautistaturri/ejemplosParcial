@@ -114,6 +114,13 @@ class ArbolBinario(Generic[T]):
 
     '''
     DFS (Depth First Search) siempre se recorre un subárbol completo antes de recorrer el o los restantes.
+
+    Los algoritmos de recorrido en profundidad utilizan recursión múltiple y se apoyan en la pila de ejecución.
+
+
+    DFS (Depth-First Search): Este tipo de recorrido utiliza una pila 
+    (puede ser la pila de la ejecución en el caso de la recursión o una pila explícita en la implementación iterativa)
+      para almacenar los nodos que deben ser visitados. DFS explora tan profundo como sea posible a lo largo de cada rama antes de retroceder.
     '''
     def preorder(self, resultado: List[T]):
         if not self.es_vacio():
@@ -146,6 +153,17 @@ class ArbolBinario(Generic[T]):
     
     '''
 BFS (Breadth First Search) es completamente diferente a las anteriores, ya que se recorren los nodos de un árbol por niveles. 
+
+
+Esta estrategia tiene una ventaja respecto al recorrido en profundidad, 
+si estuviéramos buscando un nodo que cumpla cierto requisito dentro de un árbol,
+ la búsqueda a lo ancho garantiza que se encontrará (si existiera) el nodo correspondiente más cercano a la raíz.
+
+
+
+ BFS (Breadth-First Search): Utiliza una cola explícita para almacenar los subárboles que quedan por recorrer. 
+ En BFS, los nodos se procesan en el orden en que son descubiertos,
+   primero se procesan todos los nodos del nivel actual antes de pasar al siguiente nivel.
 '''
 
     def bfs(self) -> List[T]:

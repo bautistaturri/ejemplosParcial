@@ -1,6 +1,8 @@
 from collections.abc import Callable
-from typing import Any, Generic, Optional, TypeVar
+from typing import Any, Generic, Optional, TypeVar, List
 from functools import wraps
+from copy import deepcopy
+from queue import Queue
 
 T = TypeVar('T')
 
@@ -11,7 +13,7 @@ class NodoAB(Generic[T]):
         self.sd: ArbolBinario[T] = ArbolBinario() if sd is None else sd
 
     def __str__(self):
-        return self.dato
+        return str(self.dato)
     
 class ArbolBinario(Generic[T]):
     def __init__(self):
@@ -52,7 +54,7 @@ class ArbolBinario(Generic[T]):
     @_Decoradores.valida_es_vacio
     def dato(self) -> T:
         assert self.raiz is not None
-        return self.raiz.dato
+        return self.raiz.dato  # Cambiado de self.raiz.dato() a self.raiz.dato
     
     @_Decoradores.valida_es_vacio
     def insertar_si(self, si: "ArbolBinario[T]"):
@@ -93,36 +95,83 @@ class ArbolBinario(Generic[T]):
             
         return mostrar(self, 0)
 
-    def inorder(self) -> list[T]:
+    def inorder(self) -> List[T]:
         if self.es_vacio():
             return []
         else:
             return self.si().inorder() + [self.dato()] + self.sd().inorder()
     
-    def inorder_tail(self) -> list[T]:
-        pass
+    def preorder(self) -> List[T]:
+        if self.es_vacio():
+            return []
+        else:
+            return [self.dato()] + self.si().preorder() + self.sd().preorder()
 
-    def preorder(self) -> list[T]:
-        pass
+    def posorder(self) -> List[T]:
+        if self.es_vacio():
+            return []
+        else:
+            return self.si().posorder() + self.sd().posorder() + [self.dato()]
+    
+    def inorder_tail(self) -> List[T]:
+        resultado: List[T] = []
+        actual = self
+        pila = []
+        while not actual.es_vacio() or pila:
+            while not actual.es_vacio():
+                pila.append(actual)
+                actual = actual.si()
+            actual = pila.pop()
+            resultado.append(actual.dato())
+            actual = actual.sd()
+        return resultado
 
-    def posorder(self) -> list[T]:
-        pass
-
-    def bfs(self) -> list[T]:
-        pass
+    def bfs(self) -> List[T]:
+        resultado: List[T] = []
+        if self.es_vacio():
+            return resultado
+        cola = Queue()
+        cola.put(self)
+        while not cola.empty():
+            actual: ArbolBinario[T] = cola.get()
+            resultado.append(actual.dato())
+            if not actual.si().es_vacio():
+                cola.put(actual.si())
+            if not actual.sd().es_vacio():
+                cola.put(actual.sd())
+        return resultado
 
     def nivel(self, x: T) -> int:
-        pass
+        if self.es_vacio():
+            return -1
+        cola = Queue()
+        cola.put((self, 0))
+        while not cola.empty():
+            actual, nivel = cola.get()
+            if actual.dato() == x:
+                return nivel
+            if not actual.si().es_vacio():
+                cola.put((actual.si(), nivel + 1))
+            if not actual.sd().es_vacio():
+                cola.put((actual.sd(), nivel + 1))
+        return -1
 
     def copy(self) -> "ArbolBinario[T]":
-        pass
+        return deepcopy(self)
 
     def espejo(self) -> "ArbolBinario[T]":
-        pass
+        if self.es_vacio():
+            return ArbolBinario()
+        si_espejo = self.sd().espejo()
+        sd_espejo = self.si().espejo()
+        return ArbolBinario.crear_nodo(self.dato(), si_espejo, sd_espejo)
         
     def sin_hojas(self):
-        pass
-        
+        if self.es_vacio() or self.es_hoja():
+            return ArbolBinario()
+        nuevo_si = self.si().sin_hojas()
+        nuevo_sd = self.sd().sin_hojas()
+        return ArbolBinario.crear_nodo(self.dato(), nuevo_si, nuevo_sd)
 
 def main():
     t = ArbolBinario.crear_nodo(1)
@@ -150,14 +199,15 @@ def main():
 
     t2 = t.copy()
     print(t2)
-    print(f'DFS inorder stack: {t2.inorder()}')
+    print(f'DFS inorder: {t2.inorder()}')
+    print(f'DFS preorder: {t2.preorder()}')
+    print(f'DFS posorder: {t2.posorder()}')
     print(f'DFS inorder tail:  {t2.inorder_tail()}')
     print(f'Nivel de 8: {t2.nivel(8)}')
 
     t3 = t2.espejo()
     print(t3)
     print(t3.sin_hojas())
-
 
 if __name__ == '__main__':
     main()
